@@ -10,18 +10,18 @@ public class EchoClient {
             System.out.println("[Client]: Started.");
 
             //socket
-            Socket socket = new Socket("localhost", 1720);
+            Socket clientSocket = new Socket("localhost", 1720);
 
-            //creates a stream to send the bytes
-            OutputStream outputStream = socket.getOutputStream();
-            //writes an object to a bytestream
+            //creates an output stream to send a bytestream to the server
+            OutputStream outputStream = clientSocket.getOutputStream();
+            //creates a writable obj to socket's inputstream be able to use
             ObjectOutputStream objOutputStream = new ObjectOutputStream(outputStream);
 
             BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
             System.out.println("[CLIENT]: Enter a string: ");
             String str = userInput.readLine();
 
-            //writes an object to the objOutputStream
+            //writes an object in bjOutputStream
             objOutputStream.writeObject(str);
             //forces it to send the stream
             objOutputStream.flush();

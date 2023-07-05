@@ -9,11 +9,11 @@ public class EchoServer {
             System.out.println("[SERVER]: Starting...");
             //sockets
             ServerSocket server = new ServerSocket(1720);
-            Socket clientSocket = server.accept();
+            Socket toClientSocket = server.accept();
 
-            //receives bytes from client
-            InputStream inputStream = clientSocket.getInputStream();
-            //converts the bytes to a readable format
+            //creates an obj to recieve the bytestream from the client
+            InputStream inputStream = toClientSocket.getInputStream();
+            //converts the bytestream to a readable obj
             ObjectInputStream objInputStream = new ObjectInputStream(inputStream);
 
             //reads the inputStream and allocates in a variable
