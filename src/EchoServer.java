@@ -8,7 +8,7 @@ public class EchoServer {
         try{
             System.out.println("[SERVER]: Starting...");
             //sockets
-            ServerSocket server = new ServerSocket(1720);
+            ServerSocket server = new ServerSocket(9999);
             Socket toClientSocket = server.accept();
 
             //creates an obj to recieve the bytestream from the client

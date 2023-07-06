@@ -10,7 +10,7 @@ public class EchoClient {
             System.out.println("[Client]: Started.");
 
             //socket
-            Socket clientSocket = new Socket("localhost", 1720);
+            Socket clientSocket = new Socket("localhost", 9999);
 
             //creates an output stream to send a bytestream to the server
             OutputStream outputStream = clientSocket.getOutputStream();
