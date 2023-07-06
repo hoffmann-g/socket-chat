@@ -33,7 +33,6 @@ public class EchoClient {
             bufferedWriter.newLine();
             bufferedWriter.flush();
 
-            
             while(socket.isConnected()){
                 String message = input.nextLine();
                 bufferedWriter.write(username + ": " +  message);
