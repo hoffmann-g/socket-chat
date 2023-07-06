@@ -1,28 +1,47 @@
-import java.io.InputStream;
-import java.io.ObjectInputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class EchoServer {
-    public static void main(String[] args){
+
+    private ServerSocket serverSocket;
+    
+    public EchoServer(ServerSocket ss){
+        this.serverSocket = ss;
+    }
+
+    public void startServer(){
+        System.out.println("Starting...");
         try{
-            System.out.println("[SERVER]: Starting...");
-            //sockets
-            ServerSocket server = new ServerSocket(9999);
-            Socket toClientSocket = server.accept();
+            while(!serverSocket.isClosed()){
+                Socket socket = serverSocket.accept();
 
-            //creates an obj to recieve the bytestream from the client
-            InputStream inputStream = toClientSocket.getInputStream();
-            //converts the bytestream to a readable obj
-            ObjectInputStream objInputStream = new ObjectInputStream(inputStream);
+                System.out.println("A new client has connected");
+                ClientHandler clientHandler = new ClientHandler(socket);
 
-            //reads the inputStream and allocates in a variable
-            String receivedStr = (String) objInputStream.readObject();
+                Thread thread = new Thread(clientHandler);
+                thread.start();
+            }
+        } catch(IOException e){
+            closeServerSocket();
+        }
+    }
 
-            System.out.println(receivedStr.toUpperCase());
-
-        } catch(Exception e){
+    public void closeServerSocket(){
+        try{
+            if(serverSocket != null){
+                serverSocket.close();
+            }
+        }catch(IOException e){
             e.printStackTrace();
         }
     }
+
+    public static void main(String[] args) throws IOException{
+        ServerSocket serverSocket = new ServerSocket(9999);
+        EchoServer server = new EchoServer(serverSocket);
+        server.startServer();
+        
+    }
 }
+

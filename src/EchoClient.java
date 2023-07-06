@@ -1,35 +1,96 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class EchoClient {
-    public static void main(String[] args){
+
+    private Socket socket;
+    private String username;
+    private BufferedReader bufferedReader;
+    private BufferedWriter bufferedWriter;
+
+    public EchoClient(Socket socket, String username){
         try{
-            System.out.println("[Client]: Started.");
+            this.socket = socket;
+            this.username = username;
+            this.bufferedReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
 
-            //socket
-            Socket clientSocket = new Socket("localhost", 9999);
+        } catch (IOException e){
+            closeEverything(socket, bufferedReader, bufferedWriter);
+        }
+        
+    }
 
-            //creates an output stream to send a bytestream to the server
-            OutputStream outputStream = clientSocket.getOutputStream();
-            //creates a writable obj to socket's inputstream be able to use
-            ObjectOutputStream objOutputStream = new ObjectOutputStream(outputStream);
+    public void sendMessage(){
+        Scanner input = new Scanner(System.in);
+        try{
+            bufferedWriter.write(username);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
 
-            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
-            System.out.println("[CLIENT]: Enter a string: ");
-            String str = userInput.readLine();
+            
+            while(socket.isConnected()){
+                String message = input.nextLine();
+                bufferedWriter.write(username + ": " +  message);
+                bufferedWriter.newLine();
+                bufferedWriter.flush();
+            }
+        } catch (IOException e){
+            closeEverything(socket, bufferedReader, bufferedWriter);
+            input.close();
+        }
+    }
 
-            //writes an object in bjOutputStream
-            objOutputStream.writeObject(str);
-            //forces it to send the stream
-            objOutputStream.flush();
+    public void listen(){
+        new Thread(new Runnable(){
+            @Override
+            public void run() {
+                String chatMessage;
 
-        } catch (Exception e){
+                while(socket.isConnected()){
+                    try{
+                        chatMessage = bufferedReader.readLine();
+                        System.out.println(chatMessage);
+                    } catch (IOException e){
+                        closeEverything(socket, bufferedReader, bufferedWriter);
+                    }
+                }
+            }
+        }).start();        
+    }
+
+    public void closeEverything(Socket s, BufferedReader r, BufferedWriter w){
+        try{
+            if(s != null){
+                s.close();
+            }
+            if(r != null){
+                s.close();
+            }
+            if(w != null){
+                w.close();
+            }
+        } catch(IOException e){
             e.printStackTrace();
         }
+    }
 
+    public static void main(String[] args) throws IOException{
+
+        try (Scanner input = new Scanner(System.in)) {
+            System.out.print("[CLIENT]: Enter your username: ");
+            String username = input.next();
+
+            Socket socket = new Socket("localhost", 9999);
+            EchoClient client = new EchoClient(socket, username);
+            client.listen();
+            client.sendMessage();
+        }
 
     }
 }
