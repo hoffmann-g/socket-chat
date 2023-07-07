@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -17,6 +16,10 @@ public class EchoServer{
             Socket socket = serverSocket.accept();
 
             ClientHandler clientHandler = new ClientHandler(socket);
+            
+            /*Thread thread = new Thread(clientHandler);
+            thread.start();*/
+
         } catch (IOException e) {
             System.out.println("server is full");
         }
