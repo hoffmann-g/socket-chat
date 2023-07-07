@@ -25,9 +25,19 @@ public class ClientHandler implements Runnable{
             System.out.println(socket + " connected");
 
         } catch (IOException e){
-
+            close(socket, in, out);
         }
         
+    }
+
+    public void close(Socket s, BufferedReader br, BufferedWriter bw){
+        try{
+            s.close();
+            br.close();
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
