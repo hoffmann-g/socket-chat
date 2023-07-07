@@ -21,7 +21,17 @@ public class EchoServer{
 
             }
         } catch (IOException e) {
-            
+            closeServerSocket();
+        }
+    }
+
+    public void closeServerSocket(){
+        try{
+            if(serverSocket != null){
+                serverSocket.close();
+            }
+        }catch(IOException e){
+            e.printStackTrace();
         }
     }
 

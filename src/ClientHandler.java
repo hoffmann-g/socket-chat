@@ -87,6 +87,7 @@ public class ClientHandler implements Runnable{
         while(socket.isConnected()){
             try{
                 message = in.readLine();
+                System.out.println(message);
                 broadcast(message, false);
             } catch (IOException e){
                 closeAll(socket, in, out);

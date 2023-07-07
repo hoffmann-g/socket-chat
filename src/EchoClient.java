@@ -14,28 +14,15 @@ public class EchoClient{
     private BufferedWriter out;
     private String username;
 
-    public EchoClient(Socket socket){
+    public EchoClient(Socket socket, String username){
         try {
             this.socket = socket;
             this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
-            sendUsername();
+            this.username = username;
 
         } catch (IOException e) {
             closeAll(socket, in, out);
-        }
-    }
-
-    public void sendUsername(){
-        Scanner input = new Scanner(System.in);
-        String user;
-        try {
-            System.out.print("Enter a username: ");
-            user = input.nextLine();
-            out.write(user);
-            out.newLine();
-            out.flush();
-        } catch (IOException e) {
         }
     }
 
@@ -56,22 +43,26 @@ public class EchoClient{
     }
 
     public void sendMessages(){
+        Scanner input = new Scanner(System.in);
         try{
-            Scanner input = new Scanner(System.in);
-            String message;
+            out.write(username);
+            out.newLine();
+            out.flush();
+
             while(socket.isConnected()){
-                message = input.nextLine();
+                String message = input.nextLine();
                 out.write(message);
                 out.newLine();
                 out.flush();
             }
         } catch (IOException e){
-
+            closeAll(socket, in, out);
+            input.close();
         }
     }
 
     public void listen(){
-        Thread thread = new Thread(new Runnable(){
+        new Thread(new Runnable(){
 
             @Override
             public void run() {
@@ -81,25 +72,27 @@ public class EchoClient{
                         System.out.println(message);
                     }
                 } catch (IOException e) {
+                    closeAll(socket, in, out);
                 }
             }
-        });
-
-        thread.start();
+        }).start();
     }
     
     public static void main(String[] args){
-        Socket socket;
+        Scanner input = new Scanner(System.in);
+
         try {
-            socket = new Socket("localhost", 1234);
-            EchoClient client = new EchoClient(socket);
+            System.out.print("Enter a username: ");
+            String user = input.nextLine();
+
+            Socket socket = new Socket("localhost", 1234);
+            EchoClient client = new EchoClient(socket, user);
+
             client.listen();
             client.sendMessages();
-            
-        } catch (ConnectException e) {
+        } catch (Exception e) {
             System.out.println("connection refused");
-        } catch (IOException e) {
-            e.printStackTrace();
+            input.close();
         }
         
 
