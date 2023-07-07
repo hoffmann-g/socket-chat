@@ -10,25 +10,33 @@ public class EchoServer{
         this.serverSocket = serverSocket;
     }
 
-    private void startServer(){
-        System.out.println("server starting...");
+    private void allowConnections(){
         try {
-            Socket socket = serverSocket.accept();
+            while(!serverSocket.isClosed()){
+                Socket socket = serverSocket.accept();
+                ClientHandler clientHandler = new ClientHandler(socket);
 
-            ClientHandler clientHandler = new ClientHandler(socket);
-            
-            /*Thread thread = new Thread(clientHandler);
-            thread.start();*/
+                Thread thread = new Thread(clientHandler);
+                thread.start();
 
+            }
         } catch (IOException e) {
-            System.out.println("server is full");
+            
         }
     }
 
-    public static void main(String[] args) throws IOException{
-        ServerSocket serverSocket = new ServerSocket(1234);
-        EchoServer server = new EchoServer(serverSocket);
-        server.startServer();
+    public static void main(String[] args) {
+        System.out.println("server starting...");
+        try {
+            ServerSocket serverSocket = new ServerSocket(1234);
+            EchoServer server = new EchoServer(serverSocket);
+            System.out.println("server started.");
+
+            server.allowConnections();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
         
     }
 }
