@@ -85,7 +85,7 @@ public class EchoClient {
             System.out.print("[CLIENT]: Enter your username: ");
             String username = input.next();
 
-            Socket socket = new Socket("localhost", 9999);
+            Socket socket = new Socket("179.152.25.60", 55555);
             EchoClient client = new EchoClient(socket, username);
             client.listen();
             client.sendMessage();
