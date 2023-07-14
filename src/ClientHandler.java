@@ -4,82 +4,96 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-public class ClientHandler implements Runnable {
-
+public class ClientHandler implements Runnable{
+    
     private Socket socket;
-    private String nickname;
-    private BufferedReader bufferedReader;
-    private BufferedWriter bufferedWriter;
+    private BufferedReader in;
+    private BufferedWriter out;
+    private String username;
 
-    public static ArrayList<ClientHandler> clients = new ArrayList<>();
+    //static cause it's a class variable
+    public static Set<ClientHandler> clients = new HashSet<>();
+    public static int clientLimit = 2;
 
     public ClientHandler(Socket socket){
         try{
             this.socket = socket;
-            this.bufferedReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
-            this.nickname = bufferedReader.readLine();
-            
+            this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+            this.out = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
+            this.username = in.readLine();
+
             clients.add(this);
+            System.out.println("client (" + socket.getPort() + ") connected.");
+            broadcast("'" + username + "' has entered the chat.", true);
+            
+            //clients.forEach(ch -> System.out.println(ch.username + " "));
 
-            broadcast("[SERVER]: '" + this.nickname + "' has entered the chat.");
-
-        } catch(Exception e){
-            closeEverything(socket, bufferedReader, bufferedWriter);
+        } catch (IOException e){
+            closeAll(socket, in, out);
         }
+        
     }
 
-    public void broadcast(String message){
-        for (ClientHandler ch : clients) {
-            try{
-                if(!ch.nickname.equals(nickname)){ //tweak leater
-                    ch.bufferedWriter.write(message);
-                    ch.bufferedWriter.newLine();
-                    ch.bufferedWriter.flush();
-                }
-            } catch (IOException e){
-                closeEverything(socket, bufferedReader, bufferedWriter);
-            }
-        }
-    }
-
-    public void removeClient(){
+    public void kickUser(){
         clients.remove(this);
-        broadcast("[SERVER]: '" + nickname + "' has left the server.");
-        System.out.println("A client has disconnected");
+        broadcast("'" + username + "' has left the chat.", true);
+        System.out.println("client (" + socket.getPort() + ") disconnected.");
     }
 
-    public void closeEverything(Socket s, BufferedReader r, BufferedWriter w){
-        removeClient();
+    public void closeAll(Socket s, BufferedReader br, BufferedWriter bw){
+        kickUser();
         try{
-            if(s != null){
+            if (s != null){
                 s.close();
             }
-            if(r != null){
-                s.close();
+            if (br != null){
+                br.close();
             }
-            if(w != null){
-                w.close();
+            if (bw != null){
+                bw.close();
             }
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    public void broadcast(String message, boolean global){
+        for (ClientHandler ch : clients) {
+            try{
+                if (global){
+                    ch.out.write(message);
+                    ch.out.newLine();
+                    ch.out.flush();
+                } else {
+                    if (!ch.username.equals(username)){
+                        ch.out.write(username + ": "+ message);
+                        ch.out.newLine();
+                        ch.out.flush();
+                    }
+                }
+            } catch (IOException e){
     
+            }
+        }
+    }
+
+    //chatting responsible method
     @Override
-    public void run() {
+    public void run(){
         String message;
         while(socket.isConnected()){
             try{
-                message = bufferedReader.readLine();
-                broadcast(message);
-            } catch(IOException e){
-                closeEverything(socket, bufferedReader, bufferedWriter);
+                message = in.readLine();
+                System.out.println(message);
+                broadcast(message, false);
+            } catch (IOException e){
+                closeAll(socket, in, out);
                 break;
             }
         }
     }
-    
+
 }

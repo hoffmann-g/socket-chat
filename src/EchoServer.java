@@ -2,27 +2,25 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class EchoServer {
+public class EchoServer{
 
     private ServerSocket serverSocket;
-    
-    public EchoServer(ServerSocket ss){
-        this.serverSocket = ss;
+
+    public EchoServer(ServerSocket serverSocket){
+        this.serverSocket = serverSocket;
     }
 
-    public void startServer(){
-        System.out.println("Starting...");
-        try{
+    private void allowConnections(){
+        try {
             while(!serverSocket.isClosed()){
                 Socket socket = serverSocket.accept();
-
-                System.out.println("A new client has connected");
                 ClientHandler clientHandler = new ClientHandler(socket);
 
                 Thread thread = new Thread(clientHandler);
                 thread.start();
+
             }
-        } catch(IOException e){
+        } catch (IOException e) {
             closeServerSocket();
         }
     }
@@ -37,10 +35,18 @@ public class EchoServer {
         }
     }
 
-    public static void main(String[] args) throws IOException{
-        ServerSocket serverSocket = new ServerSocket(9999);
-        EchoServer server = new EchoServer(serverSocket);
-        server.startServer();        
+    public static void main(String[] args) {
+        System.out.println("server starting...");
+        try {
+            ServerSocket serverSocket = new ServerSocket(1234);
+            EchoServer server = new EchoServer(serverSocket);
+            System.out.println("server started.");
+
+            server.allowConnections();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        
     }
 }
-
