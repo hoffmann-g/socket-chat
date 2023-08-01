@@ -26,7 +26,7 @@ public class ClientHandler implements Runnable{
             this.username = in.readLine();
 
             clients.add(this);
-            System.out.println("client (" + socket.getPort() + ") connected.");
+            System.out.println("client[" + socket.getPort() + "] connected.");
             broadcast("'" + username + "' has entered the chat.", true);
             
             //clients.forEach(ch -> System.out.println(ch.username + " "));
@@ -40,7 +40,7 @@ public class ClientHandler implements Runnable{
     public void kickUser(){
         clients.remove(this);
         broadcast("'" + username + "' has left the chat.", true);
-        System.out.println("client (" + socket.getPort() + ") disconnected.");
+        System.out.println("client[" + socket.getPort() + "] disconnected.");
     }
 
     public void closeAll(Socket s, BufferedReader br, BufferedWriter bw){
